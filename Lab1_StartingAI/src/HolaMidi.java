@@ -49,29 +49,46 @@ public class HolaMidi extends PApplet {
 
 		player = new MelodyPlayer(this, 100.0f);
 
-		player.setup();
+		//player.setup();
 		player.setMelody(midiNotes.getPitchArray());
 		player.setRhythm(midiNotes.getRhythmArray());
 		
-		ProbabilityGenerator<Integer> myGenerator = new ProbabilityGenerator<Integer>();
+//probability calculations
+//		ProbabilityGenerator<Integer> myGenerator = new ProbabilityGenerator<Integer>();
+//		myGenerator.trainPitches(midiNotes.pitches);
+//		myGenerator.trainRhythms(midiNotes.rhythms);
+//		for (int i = 0; i < midiNotes.pitches.size(); i++) {
+//			myGenerator.generateNotes();
+//		}
+//		for (int i = 0; i < midiNotes.rhythms.size(); i++) {
+//			myGenerator.generateRhythms();
+//		}
+//		System.out.println("generatedNotes by probability: " + myGenerator.generatedNotes);
+//		System.out.println("generatedRhythms by probability: " + myGenerator.generatedRhythms);
 		
-		//probability calculations
-		myGenerator.train(midiNotes.pitches);
+//Markov calculations
+		MarkovGenerator<Integer> notesMarkov = new MarkovGenerator<Integer>();
+		notesMarkov.markovCalcs(midiNotes.pitches);
+		//generate
 		for (int i = 0; i < midiNotes.pitches.size(); i++) {
-			myGenerator.generate();
+			notesMarkov.generateMarkov(71);
 		}
-		System.out.println("generatedNotes by probability: " + myGenerator.generatedNotes);
+		System.out.println("GeneratedMarkovNotes: " + notesMarkov.generatedMarkov);
 		
-		//markov calculations
-		myGenerator.markovCalcs(71, midiNotes.pitches);
-		for (int i = 0; i < midiNotes.pitches.size(); i++) {
-			myGenerator.generateMarkov();
+		MarkovGenerator<Double> rhythmsMarkov = new MarkovGenerator<Double>();
+		for (int i = 0; i < midiNotes.rhythms.size(); i++) {
+			midiNotes.rhythms.set(i, ((float)Math.round(midiNotes.rhythms.get(i) * 100.0) / 100.0)); //https://www.quora.com/How-can-I-round-a-double-number-to-4-decimal-digits-in-Java
 		}
-		System.out.println("generatedNotes by Markov: " + myGenerator.generatedMarkov);
+		System.out.println("New Rhythms" + midiNotes.rhythms);
+		rhythmsMarkov.markovCalcs(midiNotes.rhythms);
+		for (int i = 0; i < midiNotes.pitches.size(); i++) {
+			rhythmsMarkov.generateMarkov(0.14);
+		}
+		System.out.println("GeneratedMarkovRhythms: " + rhythmsMarkov.generatedMarkov);
 	}
 
 	public void draw() {
-		ellipse(width / 2, height / 2, second(), second());
+		//ellipse(width / 2, height / 2, second(), second());
 		//player.play();
 	}
 
